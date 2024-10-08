@@ -6,7 +6,7 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
 
 # Read and preprocess data
 df = pd.read_excel("datasets\coviddata.xlsx")
@@ -14,6 +14,7 @@ dff = df.groupby('countriesAndTerritories', as_index=False)[['deaths','cases']].
 
 # Define the app layout
 app.layout = html.Div([
+    html.H1("Covid-19 data dashboard",style={'text-align':'center'}),
     html.Div([
         dash_table.DataTable(
             id='datatable_id',
@@ -56,7 +57,7 @@ app.layout = html.Div([
         ],className='six columns'),
 
         html.Div([
-            dcc.Dropdown(id='linedropdown',
+            dcc.Dropdown(id='scatterdropdown',
                 options=[
                          {'label': 'Deaths', 'value': 'deaths'},
                          {'label': 'Cases', 'value': 'cases'}
@@ -69,14 +70,16 @@ app.layout = html.Div([
     ],className='row'),
 
     html.Div([
-        html.Div([
-            dcc.Graph(id='piechart'),
-        ],className='four columns'),
 
         html.Div([
             dcc.Graph(id='scatterchart'),
-        ],className='eight columns'),
-    ],className='row'),
+        ], style={'display': 'inline-block', 'width': '49%'}),  # Use inline-block and width for side-by-side layout
+
+        html.Div([
+            dcc.Graph(id='piechart'),
+        ], style={'display': 'inline-block', 'width': '49%'})  # Use inline-block and width for side-by-side layout
+    ]),
+
 ])
 
 @app.callback(
@@ -84,7 +87,7 @@ app.layout = html.Div([
      Output('piechart', 'figure')],
     [Input('datatable_id', 'selected_rows'),
      Input('piedropdown', 'value'),
-     Input('linedropdown', 'value')]
+     Input('scatterdropdown', 'value')]
 )
 def update_data(chosen_rows,piedropval,linedropval):
     if len(chosen_rows)==0:

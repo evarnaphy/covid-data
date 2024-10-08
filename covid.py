@@ -6,7 +6,7 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
 
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
 
 #---------------------------------------------------------------
 
@@ -16,13 +16,14 @@ dff = df.groupby('countriesAndTerritories', as_index=False)[['deaths','cases']].
 print (dff[:5])
 #---------------------------------------------------------------
 app.layout = html.Div([
+    html.H1("Covid-19 data dashboard",style={'text-align':'center'}),
+
+    # Data Table
     html.Div([
         dash_table.DataTable(
             id='datatable_id',
             data=dff.to_dict('records'),
-            columns=[
-                {"name": i, "id": i, "deletable": False, "selectable": False} for i in dff.columns
-            ],
+            columns=[{"name": i, "id": i, "deletable": False, "selectable": False} for i in dff.columns],
             editable=False,
             filter_action="native",
             sort_action="native",
@@ -31,63 +32,46 @@ app.layout = html.Div([
             row_deletable=False,
             selected_rows=[],
             page_action="native",
-            page_current= 0,
-            page_size= 6,
-            # page_action='none',
-            # style_cell={
-            # 'whiteSpace': 'normal'
-            # },
-            # fixed_rows={ 'headers': True, 'data': 0 },
-            # virtualization=False,
+            page_current=0,
+            page_size=6,
             style_cell_conditional=[
-                {'if': {'column_id': 'countriesAndTerritories'},
-                 'width': '40%', 'textAlign': 'left'},
-                {'if': {'column_id': 'deaths'},
-                 'width': '30%', 'textAlign': 'left'},
-                {'if': {'column_id': 'cases'},
-                 'width': '30%', 'textAlign': 'left'},
+                {'if': {'column_id': 'countriesAndTerritories'}, 'width': '40%', 'textAlign': 'left'},
+                {'if': {'column_id': 'deaths'}, 'width': '30%', 'textAlign': 'left'},
+                {'if': {'column_id': 'cases'}, 'width': '30%', 'textAlign': 'left'},
             ],
         ),
-    ],className='row'),
+    ], className='row'),
 
+    # Dropdowns for Line and Pie Charts
     html.Div([
         html.Div([
             dcc.Dropdown(id='linedropdown',
-                options=[
-                         {'label': 'Deaths', 'value': 'deaths'},
-                         {'label': 'Cases', 'value': 'cases'}
-                ],
-                value='deaths',
-                multi=False,
-                clearable=False
-            ),
-        ],className='six columns'),
+                         options=[{'label': 'Deaths', 'value': 'deaths'}, {'label': 'Cases', 'value': 'cases'}],
+                         value='deaths',
+                         multi=False,
+                         clearable=False),
+        ], className='six columns'),
 
         html.Div([
-        dcc.Dropdown(id='piedropdown',
-            options=[
-                     {'label': 'Deaths', 'value': 'deaths'},
-                     {'label': 'Cases', 'value': 'cases'}
-            ],
-            value='cases',
-            multi=False,
-            clearable=False
-        ),
-        ],className='six columns'),
+            dcc.Dropdown(id='piedropdown',
+                         options=[{'label': 'Deaths', 'value': 'deaths'}, {'label': 'Cases', 'value': 'cases'}],
+                         value='cases',
+                         multi=False,
+                         clearable=False),
+        ], className='six columns'),
+    ], className='row'),
 
-    ],className='row'),
-
+    # Manually style to place Line and Pie chart side by side
     html.Div([
+
         html.Div([
             dcc.Graph(id='linechart'),
-        ],className='six columns'),
+        ], style={'display': 'inline-block', 'width': '49%'}),  # Use inline-block and width for side-by-side layout
 
         html.Div([
             dcc.Graph(id='piechart'),
-        ],className='six columns'),
-
-    ],className='row'),
-
+        ], style={'display': 'inline-block', 'width': '49%'})  # Use inline-block and width for side-by-side layout
+    ]),
 
 ])
 
